@@ -1,6 +1,9 @@
 spring:
+  main:
+    allow-circular-references: true
+
   profiles:
-    active: pro
+    active: dev
 
   sql:
     init:
