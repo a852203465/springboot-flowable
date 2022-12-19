@@ -185,16 +185,12 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
         TaskQuery taskQuery = createTaskQuery();
         taskQuery.processInstanceId(processInstanceId);
 
-        if (CollectionUtil.isNotEmpty(candidateGroups)) {
-            taskQuery.taskCandidateGroupIn(candidateGroups);
-        }
-
         if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isNotBlank(assignee)) {
-            taskQuery.or();
-        }
-
-        if (StrUtil.isNotBlank(assignee)) {
-            taskQuery.taskCandidateOrAssigned(assignee);
+            taskQuery.or().taskInvolvedGroups(candidateGroups).taskInvolvedUser(assignee).endOr();
+        }else if (StrUtil.isNotBlank(assignee) && CollectionUtil.isEmpty(candidateGroups)) {
+            taskQuery.taskInvolvedUser(assignee);
+        }else if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isBlank(assignee)) {
+            taskQuery.taskInvolvedGroups(candidateGroups);
         }
 
         return taskQuery.singleResult();
@@ -209,11 +205,12 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
     @Override
     public List<Task> queryTodoTask(String assignee, Set<String> candidateGroups) {
         TaskQuery taskQuery = createTaskQuery();
-        if (CollectionUtil.isNotEmpty(candidateGroups)) {
-            taskQuery.taskCandidateGroupIn(candidateGroups).or();
-        }
-        if (StrUtil.isNotBlank(assignee)) {
-            taskQuery.taskCandidateOrAssigned(assignee);
+        if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isNotBlank(assignee)) {
+            taskQuery.or().taskInvolvedGroups(candidateGroups).taskInvolvedUser(assignee).endOr();
+        }else if (StrUtil.isNotBlank(assignee) && CollectionUtil.isEmpty(candidateGroups)) {
+            taskQuery.taskInvolvedUser(assignee);
+        }else if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isBlank(assignee)) {
+            taskQuery.taskInvolvedGroups(candidateGroups);
         }
         return taskQuery.list();
     }
