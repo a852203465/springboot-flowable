@@ -1,9 +1,9 @@
 package cn.darkjrong.workflow.flowable.service;
 
+import com.github.pagehelper.PageInfo;
 import cn.darkjrong.workflow.flowable.domain.ActivityInfo;
 import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
 import cn.darkjrong.workflow.flowable.domain.TaskInfo;
-import com.github.pagehelper.PageInfo;
 import org.flowable.bpmn.model.ExtensionElement;
 import org.flowable.bpmn.model.FlowElement;
 import org.flowable.bpmn.model.SequenceFlow;

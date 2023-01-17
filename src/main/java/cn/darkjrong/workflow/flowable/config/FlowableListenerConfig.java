@@ -5,13 +5,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
-import org.flowable.engine.RepositoryService;
 import org.flowable.spring.SpringProcessEngineConfiguration;
 import org.flowable.spring.boot.EngineConfigurationConfigurer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 import java.util.Map;
@@ -25,13 +22,9 @@ import java.util.Map;
 @Configuration
 public class FlowableListenerConfig {
 
-    @Lazy
-    @Autowired
-    private RepositoryService repositoryService;
-
     @Bean
     public AutoCompleteFirstTaskListener autoCompleteFirstTaskListener() {
-        return new AutoCompleteFirstTaskListener(repositoryService);
+        return new AutoCompleteFirstTaskListener();
     }
 
     /**

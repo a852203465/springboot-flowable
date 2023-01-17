@@ -1,7 +1,7 @@
 package cn.darkjrong.workflow.flowable.utils;
 
-import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.*;
 import org.flowable.engine.history.HistoricActivityInstance;

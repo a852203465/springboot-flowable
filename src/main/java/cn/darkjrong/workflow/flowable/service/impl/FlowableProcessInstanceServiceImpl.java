@@ -1,5 +1,11 @@
 package cn.darkjrong.workflow.flowable.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.img.ImgUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.github.pagehelper.PageInfo;
 import cn.darkjrong.workflow.flowable.domain.ProcessInstanceInfo;
 import cn.darkjrong.workflow.flowable.image.CustomProcessDiagramGenerator;
 import cn.darkjrong.workflow.flowable.image.svg.DefaultSvgProcessDiagramGenerator;
@@ -7,12 +13,6 @@ import cn.darkjrong.workflow.flowable.image.svg.SvgProcessDiagramGenerator;
 import cn.darkjrong.workflow.flowable.service.FlowableHistoricService;
 import cn.darkjrong.workflow.flowable.service.FlowableProcessInstanceService;
 import cn.darkjrong.workflow.flowable.service.FlowableTaskService;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.img.ImgUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.FlowElement;
@@ -209,11 +209,18 @@ public class FlowableProcessInstanceServiceImpl extends FlowableFactory implemen
 
     @Override
     public ProcessInstanceInfo queryProcessInstance(String processInstanceId) {
+
         //历史流程实例
-        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-        Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult();
+        HistoricProcessInstance historicProcessInstance = flowableHistoricService.queryHistoricProcessInstance(processInstanceId);
+
+        Deployment deployment = repositoryService.createDeploymentQuery()
+                .deploymentId(historicProcessInstance.getDeploymentId())
+                .singleResult();
+
         //运行中流程实例
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(historicProcessInstance.getId()).singleResult();
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .singleResult();
 
         ProcessInstanceInfo processInstanceInfo = new ProcessInstanceInfo();
         processInstanceInfo.setDeploymentId(deployment.getId());
@@ -231,10 +238,15 @@ public class FlowableProcessInstanceServiceImpl extends FlowableFactory implemen
             processInstanceInfo.setFinished(Boolean.TRUE);
         } else {
             processInstanceInfo.setFinished(Boolean.FALSE);
+
             //查出当前审批节点
-            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId(processInstanceId).unfinished().singleResult();
-            processInstanceInfo.setCurrentAssignee(historicTaskInstance.getAssignee());
-            processInstanceInfo.setCurrentTaskName(historicTaskInstance.getName());
+            List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery()
+                    .processInstanceId(processInstanceId)
+                    .unfinished()
+                    .list();
+
+            processInstanceInfo.setCurrentAssignee(historicTaskInstances.stream().map(HistoricTaskInstance::getAssignee).collect(Collectors.toSet()));
+            processInstanceInfo.setCurrentTaskName(historicTaskInstances.get(0).getName());
         }
         return processInstanceInfo;
     }

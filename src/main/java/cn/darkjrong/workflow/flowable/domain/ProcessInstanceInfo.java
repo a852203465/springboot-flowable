@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * 流程实例信息
@@ -72,9 +73,9 @@ public class ProcessInstanceInfo implements Serializable {
     private Boolean finished;
 
     /**
-     * 当前节点审批人
+     * 当前节点审批人, 如果是会签是多个
      */
-    private String currentAssignee;
+    private Set<String> currentAssignee;
 
     /**
      * 任务名称

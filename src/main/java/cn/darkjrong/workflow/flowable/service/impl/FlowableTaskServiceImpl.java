@@ -1,16 +1,5 @@
 package cn.darkjrong.workflow.flowable.service.impl;
 
-import cn.darkjrong.workflow.flowable.domain.ActivityInfo;
-import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
-import cn.darkjrong.workflow.flowable.domain.TaskInfo;
-import cn.darkjrong.workflow.flowable.enums.CommentTypeEnum;
-import cn.darkjrong.workflow.flowable.enums.VariablesEnum;
-import cn.darkjrong.workflow.flowable.service.FlowableHistoricService;
-import cn.darkjrong.workflow.flowable.service.FlowableProcessInstanceService;
-import cn.darkjrong.workflow.flowable.service.FlowableProcessService;
-import cn.darkjrong.workflow.flowable.service.FlowableTaskService;
-import cn.darkjrong.workflow.flowable.utils.FlowableUtils;
-import cn.darkjrong.workflow.flowable.utils.PageableUtils;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -22,6 +11,17 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
+import cn.darkjrong.workflow.flowable.domain.ActivityInfo;
+import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
+import cn.darkjrong.workflow.flowable.domain.TaskInfo;
+import cn.darkjrong.workflow.flowable.enums.CommentTypeEnum;
+import cn.darkjrong.workflow.flowable.enums.VariablesEnum;
+import cn.darkjrong.workflow.flowable.service.FlowableHistoricService;
+import cn.darkjrong.workflow.flowable.service.FlowableProcessInstanceService;
+import cn.darkjrong.workflow.flowable.service.FlowableProcessService;
+import cn.darkjrong.workflow.flowable.service.FlowableTaskService;
+import cn.darkjrong.workflow.flowable.utils.FlowableUtils;
+import cn.darkjrong.workflow.flowable.utils.PageableUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -192,8 +192,8 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
         }else if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isBlank(assignee)) {
             taskQuery.taskInvolvedGroups(candidateGroups);
         }
-
-        return taskQuery.singleResult();
+        List<Task> tasks = taskQuery.list();
+        return CollectionUtil.isNotEmpty(tasks) ? tasks.get(0) : null;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package cn.darkjrong.workflow.flowable.image.svg.icon;
 
-
 import cn.darkjrong.workflow.flowable.image.svg.ProcessDiagramSVGGraphics2D;
 
 /**
