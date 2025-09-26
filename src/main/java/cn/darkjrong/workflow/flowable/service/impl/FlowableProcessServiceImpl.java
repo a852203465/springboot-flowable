@@ -18,8 +18,8 @@ import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
-import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
+import org.flowable.bpmn.model.Process;
 import org.flowable.common.engine.api.FlowableException;
 import org.flowable.engine.repository.*;
 import org.flowable.image.ProcessDiagramGenerator;
@@ -362,9 +362,7 @@ public class FlowableProcessServiceImpl extends FlowableFactory implements Flowa
      */
     private List<ValidationErrorInfo> getValidationError(List<ValidationError> validationErrors) {
         if (CollectionUtil.isEmpty(validationErrors)) return Collections.emptyList();
-        return validationErrors.stream()
-                .map(a -> BeanUtil.copyProperties(a, ValidationErrorInfo.class))
-                .collect(Collectors.toList());
+       return BeanUtil.copyToList(validationErrors, ValidationErrorInfo.class);
     }
 
 }

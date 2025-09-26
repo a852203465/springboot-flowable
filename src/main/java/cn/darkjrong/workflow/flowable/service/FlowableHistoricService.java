@@ -1,9 +1,9 @@
 package cn.darkjrong.workflow.flowable.service;
 
-import com.github.pagehelper.PageInfo;
 import cn.darkjrong.workflow.flowable.domain.HistoricActivityInfo;
 import cn.darkjrong.workflow.flowable.domain.HistoricTaskInfo;
 import cn.darkjrong.workflow.flowable.domain.ReturnTask;
+import com.github.pagehelper.PageInfo;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricActivityInstanceQuery;
 import org.flowable.engine.history.HistoricProcessInstance;
@@ -167,7 +167,13 @@ public interface FlowableHistoricService {
      */
     List<ReturnTask> queryReturnTasks(String processInstanceId, String assignee, Set<String> candidateGroups);
 
-
+    /**
+     * 转换历史任务
+     *
+     * @param historicTaskInstance 历史任务实例
+     * @return {@link HistoricTaskInfo} 历史任务
+     */
+    HistoricTaskInfo convertHistoricTask(HistoricTaskInstance historicTaskInstance);
 
 
 

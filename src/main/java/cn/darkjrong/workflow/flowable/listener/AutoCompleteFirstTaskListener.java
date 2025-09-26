@@ -1,7 +1,6 @@
 package cn.darkjrong.workflow.flowable.listener;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjectUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -12,6 +11,7 @@ import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.flowable.common.engine.impl.event.FlowableEntityEventImpl;
 import org.flowable.engine.impl.context.Context;
+import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 
 /**
@@ -24,8 +24,11 @@ import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 @AllArgsConstructor
 public class AutoCompleteFirstTaskListener implements FlowableEventListener {
 
+//    private final RequestInfoService requestInfoService;
+
     @Override
     public void onEvent(FlowableEvent event) {
+        log.info("=================== 开始自动完成首个任务 ===================");
         if (!(event instanceof FlowableEntityEventImpl)) {
             return;
         }
@@ -45,11 +48,26 @@ public class AutoCompleteFirstTaskListener implements FlowableEventListener {
             //找到流程第一个userTask节点
             FlowElement firstElement = this.findFirstFlowElement(taskEntity);
 
+            ProcessInstance processInstance = Context.getProcessEngineConfiguration()
+                    .getRuntimeService().createProcessInstanceQuery()
+                    .processInstanceId(taskEntity.getProcessInstanceId()).singleResult();
+
+//            RequestInfoVO requestInfoVO = requestInfoService.queryById(Convert.toLong(processInstance.getBusinessKey()));
+//
+//            //对比节点是否相同,因为有可能有子流程的节点进来
+//            if (ObjectUtil.isAllNotEmpty(firstElement, requestInfoVO)
+//                    && requestInfoVO.getStatus().equals(RequestStatus.NEW.getValue())
+//                    && taskEntity.getTaskDefinitionKey().equals(firstElement.getId())) {
+//                log.info("自动完成流程 【{}】的实例 【{}】的节点【{}】任务", taskEntity.getProcessDefinitionId(), taskEntity.getProcessInstanceId(), taskEntity.getName());
+//                Context.getProcessEngineConfiguration().getTaskService().complete(taskEntity.getId());
+//            }
+
             //对比节点是否相同,因为有可能有子流程的节点进来
-            if (ObjectUtil.isAllNotEmpty(firstElement) && taskEntity.getTaskDefinitionKey().equals(firstElement.getId())) {
+            if (taskEntity.getTaskDefinitionKey().equals(firstElement.getId())) {
                 log.info("自动完成流程 【{}】的实例 【{}】的节点【{}】任务", taskEntity.getProcessDefinitionId(), taskEntity.getProcessInstanceId(), taskEntity.getName());
                 Context.getProcessEngineConfiguration().getTaskService().complete(taskEntity.getId());
             }
+
         }
     }
 

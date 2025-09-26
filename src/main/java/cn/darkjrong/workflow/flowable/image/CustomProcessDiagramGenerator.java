@@ -13,16 +13,16 @@
 
 package cn.darkjrong.workflow.flowable.image;
 
+import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Event;
 import org.flowable.bpmn.model.Process;
-import org.flowable.bpmn.model.*;
 import org.flowable.image.ProcessDiagramGenerator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
  * 自定义默认过程图生成器

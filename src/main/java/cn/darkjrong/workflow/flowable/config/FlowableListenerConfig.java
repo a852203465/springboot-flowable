@@ -22,6 +22,10 @@ import java.util.Map;
 @Configuration
 public class FlowableListenerConfig {
 
+//    @Lazy
+//    @Autowired
+//    private RequestInfoService requestInfoService;
+
     @Bean
     public AutoCompleteFirstTaskListener autoCompleteFirstTaskListener() {
         return new AutoCompleteFirstTaskListener();
@@ -35,7 +39,8 @@ public class FlowableListenerConfig {
      */
     private Map<String, List<FlowableEventListener>> customFlowableListeners() {
         Map<String, List<FlowableEventListener>> listenerMap = MapUtil.newHashMap();
-        listenerMap.put(FlowableEngineEventType.TASK_CREATED.name(), CollectionUtil.newArrayList(autoCompleteFirstTaskListener()));
+        listenerMap.put(FlowableEngineEventType.TASK_CREATED.name(),
+                CollectionUtil.newArrayList(autoCompleteFirstTaskListener()));
         return listenerMap;
     }
 
@@ -44,7 +49,8 @@ public class FlowableListenerConfig {
      */
     @Bean
     public EngineConfigurationConfigurer<SpringProcessEngineConfiguration> globalListenerConfigurer() {
-        return engineConfiguration -> engineConfiguration.setTypedEventListeners(this.customFlowableListeners());
+        return engineConfiguration
+                -> engineConfiguration.setTypedEventListeners(this.customFlowableListeners());
     }
 
 

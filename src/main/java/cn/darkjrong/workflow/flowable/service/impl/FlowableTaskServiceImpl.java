@@ -13,8 +13,8 @@ import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import cn.darkjrong.workflow.flowable.domain.ActivityInfo;
 import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
+import cn.darkjrong.workflow.flowable.domain.HistoricTaskInfo;
 import cn.darkjrong.workflow.flowable.domain.TaskInfo;
-import cn.darkjrong.workflow.flowable.enums.CommentTypeEnum;
 import cn.darkjrong.workflow.flowable.enums.VariablesEnum;
 import cn.darkjrong.workflow.flowable.service.FlowableHistoricService;
 import cn.darkjrong.workflow.flowable.service.FlowableProcessInstanceService;
@@ -23,8 +23,8 @@ import cn.darkjrong.workflow.flowable.service.FlowableTaskService;
 import cn.darkjrong.workflow.flowable.utils.FlowableUtils;
 import cn.darkjrong.workflow.flowable.utils.PageableUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
+import org.flowable.bpmn.model.Process;
 import org.flowable.common.engine.api.FlowableException;
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.common.engine.impl.de.odysseus.el.ExpressionFactoryImpl;
@@ -48,6 +48,7 @@ import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
+import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,7 +182,6 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
 
     @Override
     public Task queryTaskByAssigneeOrCandidate(String processInstanceId, String assignee, Set<String> candidateGroups) {
-
         TaskQuery taskQuery = createTaskQuery();
         taskQuery.processInstanceId(processInstanceId);
 
@@ -194,6 +194,28 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
         }
         List<Task> tasks = taskQuery.list();
         return CollectionUtil.isNotEmpty(tasks) ? tasks.get(0) : null;
+    }
+
+    @Override
+    public List<HistoricTaskInfo> findHaveDoneTask(String assignee, Set<String> candidateGroups) {
+        HistoricTaskInstanceQuery query = historyService.createHistoricTaskInstanceQuery();
+
+        if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isNotBlank(assignee)) {
+            query.or().taskInvolvedGroups(candidateGroups).taskAssignee(assignee).endOr();
+        }else if (StrUtil.isNotBlank(assignee) && CollectionUtil.isEmpty(candidateGroups)) {
+            query.taskAssignee(assignee);
+        }else if (CollectionUtil.isNotEmpty(candidateGroups) && StrUtil.isBlank(assignee)) {
+            query.taskInvolvedGroups(candidateGroups);
+        }
+        query.finished();
+        List<HistoricTaskInstance> finishedTasks = query.list();
+        if (CollectionUtil.isNotEmpty(finishedTasks)) {
+            return finishedTasks.stream()
+                    .filter(a -> ObjectUtil.isNotNull(a.getEndTime()))
+                    .map(a -> flowableHistoricService.convertHistoricTask(a))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -562,7 +584,10 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
             }
         }));
         // 设置驳回意见
-        currentTaskIds.forEach(item -> taskService.addComment(item, task.getProcessInstanceId(), CommentTypeEnum.BH.getName(), description));
+//        currentTaskIds.forEach(item -> taskService.addComment(item, task.getProcessInstanceId(), CommentTypeEnum.BH.getName(), description));
+        for (String currentTaskId : currentTaskIds) {
+            taskService.addComment(currentTaskId, task.getProcessInstanceId(), CommentEntity.TYPE_COMMENT, description);
+        }
 
         try {
             // 如果父级任务多于 1 个，说明当前节点不是并行节点，原因为不考虑多对多情况
@@ -666,7 +691,8 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
         }));
         // 设置回退意见
         for (String currentTaskId : currentTaskIds) {
-            taskService.addComment(currentTaskId, task.getProcessInstanceId(), CommentTypeEnum.TH.getName(), description);
+//            taskService.addComment(currentTaskId, task.getProcessInstanceId(), CommentTypeEnum.TH.getName(), description);
+            taskService.addComment(currentTaskId, task.getProcessInstanceId(), CommentEntity.TYPE_COMMENT, description);
         }
 
         try {
@@ -837,8 +863,8 @@ public class FlowableTaskServiceImpl extends FlowableFactory implements Flowable
         //添加加签数据
         this.createSignSubTasks(assignee, assignees, task);
         //添加审批意见
-        String type = flag ? CommentTypeEnum.HJQ.getName() : CommentTypeEnum.QJQ.getName();
-        taskService.addComment(task.getId(), processInstanceId, type, description);
+//        String type = flag ? CommentTypeEnum.HJQ.getName() : CommentTypeEnum.QJQ.getName();
+        taskService.addComment(task.getId(), processInstanceId, CommentEntity.TYPE_COMMENT, description);
     }
 
     @Override

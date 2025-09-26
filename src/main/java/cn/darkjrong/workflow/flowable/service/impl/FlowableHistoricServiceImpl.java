@@ -252,20 +252,17 @@ public class FlowableHistoricServiceImpl extends FlowableFactory implements Flow
             historicActivityInfo.setDeleteReason(historicActivityInstance.getDeleteReason());
             List<Comment> comments = flowableTaskService.queryTaskComments(historicActivityInstance.getTaskId(), CommentEntity.TYPE_COMMENT);
             if (CollectionUtil.isNotEmpty(comments)) {
-                comments.stream().filter(a -> StrUtil.isNotBlank(a.getFullMessage())).findAny().ifPresent(b -> historicActivityInfo.setDescription(b.getFullMessage()));
+                comments.stream()
+                        .filter(a -> StrUtil.isNotBlank(a.getFullMessage())).findAny()
+                        .ifPresent(b -> historicActivityInfo.setDescription(b.getFullMessage()));
             }
             return historicActivityInfo;
         }
         return null;
     }
 
-    /**
-     * 转换历史任务
-     *
-     * @param historicTaskInstance 历史任务实例
-     * @return {@link HistoricTaskInfo} 历史任务
-     */
-    private HistoricTaskInfo convertHistoricTask(HistoricTaskInstance historicTaskInstance) {
+    @Override
+    public HistoricTaskInfo convertHistoricTask(HistoricTaskInstance historicTaskInstance) {
         if (ObjectUtil.isNotNull(historicTaskInstance)) {
             HistoricTaskInfo historicTaskInfo = new HistoricTaskInfo();
             historicTaskInfo.setId(historicTaskInstance.getId());

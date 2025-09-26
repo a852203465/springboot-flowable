@@ -3,6 +3,7 @@ package cn.darkjrong.workflow.flowable.service;
 import com.github.pagehelper.PageInfo;
 import cn.darkjrong.workflow.flowable.domain.ActivityInfo;
 import cn.darkjrong.workflow.flowable.domain.ExtensionElementInfo;
+import cn.darkjrong.workflow.flowable.domain.HistoricTaskInfo;
 import cn.darkjrong.workflow.flowable.domain.TaskInfo;
 import org.flowable.bpmn.model.ExtensionElement;
 import org.flowable.bpmn.model.FlowElement;
@@ -248,6 +249,15 @@ public interface FlowableTaskService {
      * @return {@link Task}
      */
     Task queryTaskByAssigneeOrCandidate(String processInstanceId, String assignee, Set<String> candidateGroups);
+
+    /**
+     * 查询已办
+     *
+     * @param assignee 处理人
+     * @param candidateGroups 候选人团体
+     * @return {@link List }<{@link HistoricTaskInfo }>
+     */
+    List<HistoricTaskInfo> findHaveDoneTask(String assignee, Set<String> candidateGroups);
 
     /**
      * 根据 办理人或者候选人或者候选人组查询活动的流程任务
